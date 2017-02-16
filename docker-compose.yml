@@ -27,7 +27,7 @@ chris_orthanc_db_data:
   image:  alpine
   command: echo Data Container
   volumes:
-    - ./db:/var/lib/orthanc/db
+    - /var/lib/orthanc/db
   labels:
     name: "Volume container for the Orthanc DB"
     role: "Volume container for the Orthanc DB"
