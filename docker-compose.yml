@@ -11,24 +11,12 @@
 chris_orthanc_db:
   image: jodogne/orthanc-plugins 
   restart: always
-  volumes_from:
-    - chris_orthanc_db_data
   volumes:
     - ./orthanc.json:/etc/orthanc/orthanc.json:ro
+    - ./db:/var/lib/orthanc/db
   labels:
     name: "Orthanc containerized instance"
     role: "Orthanc containerized instance"
   ports:
     - "4242:4242"
     - "8044:8042"
-
-
-chris_orthanc_db_data:
-  image:  alpine
-  command: echo Data Container
-  volumes:
-    - ./db:/var/lib/orthanc/db
-  labels:
-    name: "Volume container for the Orthanc DB"
-    role: "Volume container for the Orthanc DB"
-
