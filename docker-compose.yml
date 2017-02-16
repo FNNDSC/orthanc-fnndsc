@@ -1,0 +1,34 @@
+# https://docs.docker.com/compose/yml/
+# Each service defined in docker-compose.yml must specify exactly one of
+# image or build. Other keys are optional, and are analogous to their
+# docker run command-line counterparts.
+#
+# As with docker run, options specified in the Dockerfile (e.g., CMD,
+# EXPOSE, VOLUME, ENV) are respected by default - you don't need to
+# specify them again in docker-compose.yml.
+#
+
+chris_orthanc_db:
+  image: jodogne/orthanc-plugins 
+  restart: always
+  volumes_from:
+    - chris_orthanc_db_data
+  volumes:
+    - ./orthanc.json:/etc/orthanc/orthanc.json:ro
+  labels:
+    name: "Orthanc containerized instance"
+    role: "Orthanc containerized instance"
+  ports:
+    - "4242:4242"
+    - "8044:8042"
+
+
+chris_orthanc_db_data:
+  image:  alpine
+  command: echo Data Container
+  volumes:
+    - ./db:/var/lib/orthanc/db
+  labels:
+    name: "Volume container for the Orthanc DB"
+    role: "Volume container for the Orthanc DB"
+
