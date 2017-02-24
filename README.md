@@ -19,7 +19,7 @@ to check this repo out into your local filesystem.
 Once checked out, run the docker with
 
 ```
-docker-compose run -d
+docker-compose up -d
 ```
 
 Note that you will of course need <tt>docker-compose</tt> for this. As of time of writing (i.e. Feb 2017), the latest ubuntu repos do **not** have the lastest version of docker, in particular if you install docker using <tt>apt install docker.io</tt> from standard repos, **you will not have the latest docker and will not have docker-compose!** 
@@ -41,7 +41,7 @@ git checkout persistent-db
 and now run as above
 
 ```
-docker-compose run -d
+docker-compose up -d
 ```
 
 You will see a directory called <tt>db</tt> in the repo root that contains the Orthanc image database.
