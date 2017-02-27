@@ -150,12 +150,10 @@
   // The list of the known DICOM modalities
   "DicomModalities" : {
     /**
-     * Uncommenting the following line would enable Orthanc to
-     * connect to an instance of the "storescp" open-source DICOM
-     * store (shipped in the DCMTK distribution) started by the
-     * command line "storescp 2000".
+     * CHIPS CALLING AET.
+     * Dicom listener running on 
      **/
-    // "sample" : [ "STORESCP", "127.0.0.1", 2000 ]
+    "chips" : [ "CHIPS", "localhost", 10403 ]
 
     /**
      * A fourth parameter is available to enable patches for a
