@@ -138,7 +138,7 @@ fi
 
 title -d 1 "Starting Orthanc environment using " " ./docker-compose.yml"
     printf "${LightCyan}%40s${LightGreen}%40s\n"                \
-            "Starting in interactive mode" "chris_dev"                          | ./boxes.sh
+            "Starting in interactive mode" "orthanc-fnndsc"                     | ./boxes.sh
     windowBottom
     docker-compose -f docker-compose.yml run                                    \
         --service-ports chris_orthanc_db >& dc.out >/dev/null
