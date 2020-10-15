@@ -107,6 +107,7 @@ fi
 CLISTENER=$(cat orthanc.json | grep chips)
 b_localhost=$(echo "$CLISTENER" | grep -i localhost | wc -l)
 if (( b_localhost )) ; then
+    echo -en "\033[2A\033[2K"
     echo "WARNING!"                                                         | ./boxes.sh ${LightRed}
     echo "The listener IP is currently set to  'localhost', which"          | ./boxes.sh ${LightRed}
     echo "means that Orthanc will PUSH DICOMs to *this* container"          | ./boxes.sh ${LightRed}
@@ -119,8 +120,8 @@ if (( b_localhost )) ; then
     echo ""                                                                 | ./boxes.sh
     windowBottom
     old_stty_cfg=$(stty -g)
+    echo -en "\033[4A\033[43C"
     stty raw -echo ; LISTENER=$(head -c 1) ; stty $old_stty_cfg
-    echo -en "\033[2A\033[2K"
     read LISTENER
     b_host=1
     if (( b_host )) ; then
@@ -136,27 +137,31 @@ if (( b_localhost )) ; then
 fi
 
 title -d 1 "Starting Orthanc environment using " " ./docker-compose.yml"
-printf "${LightCyan}%40s${LightGreen}%40s\n"                \
-            "Starting in interactive mode" "chris_dev"      | ./boxes.sh
-windowBottom
-docker-compose -f docker-compose.yml run --service-ports chris_orthanc_db
-
-if (( $? == "1" )) ; then
-    echo ""
-    title -d 1 "Error detected!"
-    echo ""                                                                 | ./boxes.sh ${LightRed}
-    echo "WARNING!"                                                         | ./boxes.sh ${LightRed}
-    echo ""                                                                 | ./boxes.sh ${LightRed}
-    echo "Some error seems to have occurred in starting this service."      | ./boxes.sh ${LightRed}
-    echo "If there is an error about "                                      | ./boxes.sh ${LightRed}
-    echo ""                                                                 | ./boxes.sh ${LightRed}
-    echo "   \"listen tcp 0.0.0.0:8042: bind: address already in use\""     | ./boxes.sh ${LightYellow}
-    echo ""                                                                 | ./boxes.sh ${LightRed}
-    echo "then please check that no service is listening on that"           | ./boxes.sh ${LightGreen}
-    echo "port. Note that if you have installed the neurodebian tools"      | ./boxes.sh ${LightGreen}
-    echo "you may have a native orthanc already listening on port"          | ./boxes.sh ${LightGreen}
-    echo "8042. Either change the portmapping for this container"           | ./boxes.sh ${LightGreen}
-    echo "or shut down whatever might be listening on port 8042."           | ./boxes.sh ${LightGreen}
-    echo ""                                                                 | ./boxes.sh ${LightGreen}
+    printf "${LightCyan}%40s${LightGreen}%40s\n"                \
+            "Starting in interactive mode" "chris_dev"                          | ./boxes.sh
     windowBottom
-fi
+    docker-compose -f docker-compose.yml run                                    \
+        --service-ports chris_orthanc_db >& dc.out >/dev/null
+    status=$?
+    echo -en "\033[2A\033[2K"
+    boxcenter " "
+    if (( $status == "1" )) ; then
+        boxcenter ""
+        boxcenter "WARNING!"                                                        ${LightRed}
+        boxcenter ""
+        boxcenter "Some error seems to have occurred in starting this service:"     ${LightRed}
+        cat dc.out | sed -E 's/(.{80})/\1\n/g'                                      | ./boxes.sh ${LightYellow}
+        boxcenter ""                                                                ${LightRed}
+        boxcenter "Please examine the above error return and note if there is "     ${LightRed}
+        boxcenter "any mention of a condition about a bind error, such as     "     ${LightRed}
+        boxcenter ""                                                                ${LightRed}
+        boxcenter "\"listen tcp 0.0.0.0:8042: bind: address already in use\""       ${LightYellow}
+        boxcenter ""                                                                ${LightRed}
+        boxcenter "If so, please check  that no  service  is listening on that"     ${LightGreen}
+        boxcenter "port. Note that if you have installed the neurodebian tools"     ${LightGreen}
+        boxcenter "you may have a native orthanc  already   listening on  port"     ${LightGreen}
+        boxcenter "8042.  Either  change the  portmapping for this   container"     ${LightGreen}
+        boxcenter "or shut down whatever might be listening on port 8042.     "     ${LightGreen}
+        boxcenter ""                                                                ${LightGreen}
+        windowBottom
+    fi
