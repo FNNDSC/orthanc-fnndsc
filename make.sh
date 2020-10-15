@@ -6,7 +6,7 @@
 #
 # SYNPOSIS
 #
-#   make [-h <IP>]
+#   make [-h <IP>] [-i]
 #
 # DESC
 #
@@ -20,15 +20,21 @@
 #       If specified set the IP of the listener to which orthanc will push
 #       images.
 #
+#   -i
+#
+#       Optional do not start system in interactive mode. This will immediately
+#       return to the shell on successful conclusion of initiating services.
 #
 
 source ./decorate.sh
 source ./cparse.sh
+declare -i b_norestartinteractive=0
 
-while getopts "h:" opt; do
+while getopts "h:i" opt; do
     case $opt in
         h) b_host=1
-           LISTENER=$OPTARG     ;;
+           LISTENER=$OPTARG             ;;
+        i) b_norestartinteractive=1     ;;
     esac
 done
 shift $(($OPTIND - 1))
@@ -136,32 +142,45 @@ if (( b_localhost )) ; then
     fi
 fi
 
-title -d 1 "Starting Orthanc environment using " " ./docker-compose.yml"
-    printf "${LightCyan}%40s${LightGreen}%40s\n"                \
-            "Starting in interactive mode" "orthanc-fnndsc"                     | ./boxes.sh
-    windowBottom
-    docker-compose -f docker-compose.yml run                                    \
-        --service-ports chris_orthanc_db >& dc.out >/dev/null
-    status=$?
+if (( ! b_norestartinteractive )) ; then
+    title -d 1 "Starting Orthanc environment "                                      \
+                    "in interactive mode..."
+        printf "${LightCyan}%40s${LightGreen}%40s\n"                                \
+                "Starting in interactive mode" "orthanc-fnndsc"                     | ./boxes.sh
+        windowBottom
+        docker-compose -f docker-compose.yml run                                    \
+            --service-ports chris_orthanc_db >& dc.out >/dev/null
+        status=$?
+else
+    title -d 1 "Starting Orthanc environment "                                      \
+                    "in non-interactive mode..."
+        printf "${LightCyan}%40s${LightGreen}%40s\n"                                \
+                "Starting in non-interactive mode" "orthanc-fnndsc"                 | ./boxes.sh
+        windowBottom
+        docker-compose -f docker-compose.yml run -d                                 \
+            --service-ports chris_orthanc_db >& dc.out >/dev/null
+        status=$?
+fi
+
+if (( $status == "1" )) ; then
     echo -en "\033[2A\033[2K"
     boxcenter " "
-    if (( $status == "1" )) ; then
-        boxcenter ""
-        boxcenter "WARNING!"                                                        ${LightRed}
-        boxcenter ""
-        boxcenter "Some error seems to have occurred in starting this service:"     ${LightRed}
-        cat dc.out | sed -E 's/(.{80})/\1\n/g'                                      | ./boxes.sh ${LightYellow}
-        boxcenter ""                                                                ${LightRed}
-        boxcenter "Please examine the above error return and note if there is "     ${LightRed}
-        boxcenter "any mention of a condition about a bind error, such as     "     ${LightRed}
-        boxcenter ""                                                                ${LightRed}
-        boxcenter "\"listen tcp 0.0.0.0:8042: bind: address already in use\""       ${LightYellow}
-        boxcenter ""                                                                ${LightRed}
-        boxcenter "If so, please check  that no  service  is listening on that"     ${LightGreen}
-        boxcenter "port. Note that if you have installed the neurodebian tools"     ${LightGreen}
-        boxcenter "you may have a native orthanc  already   listening on  port"     ${LightGreen}
-        boxcenter "8042.  Either  change the  portmapping for this   container"     ${LightGreen}
-        boxcenter "or shut down whatever might be listening on port 8042.     "     ${LightGreen}
-        boxcenter ""                                                                ${LightGreen}
-        windowBottom
+    boxcenter ""
+    boxcenter "WARNING!"                                                        ${LightRed}
+    boxcenter ""
+    boxcenter "Some error seems to have occurred in starting this service:"     ${LightRed}
+    cat dc.out | sed -E 's/(.{80})/\1\n/g'                                      | ./boxes.sh ${LightYellow}
+    boxcenter ""                                                                ${LightRed}
+    boxcenter "Please examine the above error return and note if there is "     ${LightRed}
+    boxcenter "any mention of a condition about a bind error, such as     "     ${LightRed}
+    boxcenter ""                                                                ${LightRed}
+    boxcenter "\"listen tcp 0.0.0.0:8042: bind: address already in use\""       ${LightYellow}
+    boxcenter ""                                                                ${LightRed}
+    boxcenter "If so, please check  that no  service  is listening on that"     ${LightGreen}
+    boxcenter "port. Note that if you have installed the neurodebian tools"     ${LightGreen}
+    boxcenter "you may have a native orthanc  already   listening on  port"     ${LightGreen}
+    boxcenter "8042.  Either  change the  portmapping for this   container"     ${LightGreen}
+    boxcenter "or shut down whatever might be listening on port 8042.     "     ${LightGreen}
+    boxcenter ""                                                                ${LightGreen}
+    windowBottom
     fi
