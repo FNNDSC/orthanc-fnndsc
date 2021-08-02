@@ -54,7 +54,7 @@ title -d 1 "Pulling non-'local/' core containers where needed..."   \
 echo "# Variables declared here are available to"               > .env
 echo "# docker-compose on execution"                            >>.env
 for CORE in ${A_CONTAINER[@]} ; do
-    cparse $CORE " " "REPO" "CONTAINER" "MMN" "ENV"
+    cparse $CORE "REPO" "CONTAINER" "MMN" "ENV"
     echo "${ENV}=${REPO}"                                       >>.env
     if [[ $REPO != "local" ]] ; then
         echo ""                                                 | ./boxes.sh
@@ -73,13 +73,13 @@ windowBottom
 title -d 1 "Shutting down any running orthanc and orthanc related containers... "
     echo "This might take a few minutes... please be patient."              | ./boxes.sh ${Yellow}
     windowBottom
-    docker-compose --no-ansi -f docker-compose.yml stop >& dc.out > /dev/null
+    docker-compose --ansi never -f docker-compose.yml stop >& dc.out > /dev/null
     echo -en "\033[2A\033[2K"
     cat dc.out | sed -E 's/(.{80})/\1\n/g'                                  | ./boxes.sh ${LightBlue}
-    docker-compose --no-ansi -f docker-compose.yml rm -vf >& dc.out > /dev/null
+    docker-compose --ansi never -f docker-compose.yml rm -vf >& dc.out > /dev/null
     cat dc.out | sed -E 's/(.{80})/\1\n/g'                                  | ./boxes.sh ${LightCyan}
     for CORE in ${A_CONTAINER[@]} ; do
-        cparse $CORE " " "REPO" "CONTAINER" "MMN" "ENV"
+        cparse $CORE "REPO" "CONTAINER" "MMN" "ENV"
         docker ps -a                                                        |\
             grep $CONTAINER                                                 |\
             awk '{printf("docker stop %s && docker rm -vf %s\n", $1, $1);}' |\
